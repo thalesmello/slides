@@ -64,7 +64,9 @@ Tome cuidado com o bug #12
 https://github.com/tpope/timl/issues/12
 
 ```vim
-let code = timl#cons#create(timl#symbol#intern('do'), timl#reader#read_string_all('1'))
+let do_symbol = timl#symbol#intern('do')
+let number_one = timl#reader#read_string_all('1')
+let code = timl#cons#create(do_symbol, number_one)
 call timl#loader#eval(code)
 ```
 
