@@ -24,7 +24,7 @@ E um pouco de Clojure (indiretamente)
 
 Clojure é um LISP com algumas características interessantes
 
-- Implementada na JVM
+- Compilada para Java Bytecode
 - Interop com Java
 - Tipos persistentes
 - Concorrência
@@ -100,3 +100,7 @@ Usando `remote plugins` do Neovim.
 - Outros: https://github.com/neovim/neovim/wiki/Related-projects
 
 ![](./neovim.png)
+
+---
+
+Obrigado!
