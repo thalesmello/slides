@@ -1,0 +1,10 @@
+(ns calculator)
+
+(defn buffer-sum []
+  (->> (#*getline "1" "$")
+       (join " ")
+       (#(split % " "))
+       (map str2nr)
+       (apply +)
+       (execute "echo")))
+
