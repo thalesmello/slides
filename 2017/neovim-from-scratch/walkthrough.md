@@ -74,6 +74,11 @@ https://github.com/junegunn/vim-plug
 
 ---
 
+`gruvbox`
+https://github.com/morhetz/gruvbox
+
+---
+
 `vim-multiple-cursors`
 
 https://github.com/terryma/vim-multiple-cursors
