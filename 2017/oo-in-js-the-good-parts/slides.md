@@ -156,7 +156,7 @@ Sabe quando você tem um monte de `if (obj == null)` em várias partes do códig
 
 # Null Object Pattern
 
-Em vez de fazer isso, utilize um Null Object, que obedece à mesma interface
+Em vez de fazer isso, utilize um Null Object, que obedece à mesma interface do seu objeto original.
 
 ---
 
@@ -333,7 +333,7 @@ class DownloadManager {
 
 ---
 
-```
+```javascript
 class DownloadManager {
   constructor (fetch, readdir, pathJoin, writeFile, folder) {
     this.fetch = fetch
@@ -393,19 +393,43 @@ class DownloadManager {
 
 ---
 
-Também, de vez em quando, 
+Também, de vez em quando, queremos utilizar um objeto ou função que já existe, mas só pra adicionar uma característica...
+
+--
 
 # Decorator
 
+Nessas situações, a gente pode criar um objeto obedecendo à mesma interface do objeto a ser modificado, repassando (ou não) as chamadas para ele.
+
+---
+
 ```javascript
-handleNewUser(makeLog(), user)
+handleNewUser(console, { username: 'deschamps', password: 'renatinha<3' })
+
 function handleNewUser(log, user) {
   log.info('New user is', user)
 }
 
-// New user is { username: deschamps, password: renatinha<3 }
+// New user is { username: 'deschamps', password: 'renatinha<3' }
+```
 
-handleNewUser(makeSafeLog(makeLog()), user)
+---
+
+```javascript
+handleNewUser(console, { username: 'deschamps', password: 'renatinha<3' })
+
+function handleNewUser(log, user) {
+  log.info('New user is', user)
+}
+
+*// New user is { username: 'deschamps', password: 'renatinha<3' }
+```
+
+---
+
+```
+const log = makeSafeLog(console)
+handleNewUser(log, { username: 'deschamps', password: 'renatinha<3' })
 
 function makeSafeLog (log) {
   return {
@@ -413,7 +437,11 @@ function makeSafeLog (log) {
       const safeArgs = []
       for (const arg of args) {
         if (Object.keys(arg).includes('password')) {
-          const obj = Object.assign({}, { passowrd: '***' })
+          const maskedArg = Object.assign({}, arg, { password: '***' })
+          safeArgs.push(maskedArg)
+        }
+        else {
+          safeArgs.push(arg)
         }
       }
       log.info(...safeArgs)
@@ -421,6 +449,7 @@ function makeSafeLog (log) {
   }
 }
 
+// New user is { username: 'deschamps', password: '***' }
 ```
 
 ---
@@ -540,3 +569,36 @@ class MapListAdapter {
 }
 ```
 
+# Conclusão
+
+Orientação a objetos se trata de uma maneira conveniente de utilizar polimorfismo
+
+--
+
+Ou seja, em vez de você ficar construindo o seu código com `if (...) {} else {}`, você consegue construir toda a lógica utilizando apenas objetos e chamadas de métodos.
+
+--
+
+---
+
+# Já ouviu falar de Smalltalk?
+
+É uma linguagem inteiramente orientada a objetos, que consegue funciona inteiramente a base de chamadas polimórfica de métodos. Não existe nem mesmo o `if` statement na linguagem.
+
+--
+
+JavaScript é uma linguagem multiparadigma. Portanto, o caminho para se escrever código legível é conhecer o melhor do que a linguagem tem a oferecer, e utilizar a arquitetura certa para resolver o problema certo.
+
+--
+
+Isso, muitas vezes, significa escrever código parte funcional, parte orientado a objetos.
+
+---
+
+class: impact
+
+# Obrigado!
+
+Slides disponíveis em https://github.com/thalesmello/slides/tree/master/2017/oo-in-js-the-good-parts
+
+## Perguntas?
