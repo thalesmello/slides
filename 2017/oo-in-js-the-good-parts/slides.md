@@ -234,8 +234,6 @@ function initializeHelpIcon (user) {
 
 ---
 
-# Alternativa
-
 ```javascript
 document.onload = onPageLoad
 
@@ -274,6 +272,83 @@ function populatePageWithUser (user) {
 function initializeHelpIcon (user) {
   const helpText = `Olá ${user.name}! Como posso te ajudar?`
   document.getElementById('help-message-text').innerHTML = helpText
+}
+```
+
+---
+
+# Strategy
+
+Eventualmente nossa aplicacão terá comportamentos variaveis de acordo com o contexto de execucão.
+Nossa solucão acaba sempre sendo usar um `switch/case` ou um conjunto de `if/else if`:
+
+```javascript
+if (auth.email && auth.password) {
+  return fetch('/api/sessions')
+    .then(res => res.json())
+    .then(...)
+} else if (auth.api_key) {
+  return fetch('/api/authenticate')
+    .then(res => res.json())
+    .then(...)
+} else if has('public_key') {
+  return fetch('/api/authenticate')
+    .then(res => res.json())
+    .then(...)
+} else {
+  return Promise.reject(new Error('Invalid Authentication'))
+}
+```
+
+---
+
+Podemos modelar esta variacão de comportamento em vários objetos de estrategia:
+
+```javascript
+class LoginStrategy {
+  constructor (params) {
+    this.params
+  }
+
+  canAuthenticate() {
+    return this.params.login && this.params.password
+  }
+
+  execute(params) {
+    return fetch('/api/sessions')
+      .then(res => res.json())
+  }
+}
+```
+
+---
+
+```javascript
+class ApiStrategy {
+  constructor (params) {
+    this.params
+  }
+
+  canAuthenticate() {
+    return this.params.api_key && true
+  }
+
+  execute(params) {
+    return fetch('/api/sessions')
+      .then(res => res.json())
+  }
+}
+
+function selectStrategy(params) {
+  const strategies = [LoginStrategy, ApiStrategy, ...]
+
+  for (StrategyClass in strategies)
+    const strategy = new StrategyClass(params)
+
+    if (strategy.canAuthenticate()) {
+      return strategy.execute()
+    }
+  }
 }
 ```
 
@@ -427,7 +502,7 @@ function handleNewUser(log, user) {
 
 ---
 
-```
+```javascript
 const log = makeSafeLog(console)
 handleNewUser(log, { username: 'deschamps', password: 'renatinha<3' })
 
@@ -454,90 +529,14 @@ function makeSafeLog (log) {
 
 ---
 
-# Strategy
-
-Eventualmente nossa aplicacão terá comportamentos variaveis de acordo com o contexto de execucão.
-Nossa solucão acaba sempre sendo usar um `switch/case` ou um conjunto de `if/else if`:
-
-```javascript
-if (auth.email && auth.password) {
-  return fetch('/api/sessions')
-    .then(res => res.json())
-    .then(...)
-} else if (auth.api_key) {
-  return fetch('/api/authenticate')
-    .then(res => res.json())
-    .then(...)
-} else if has('public_key') {
-  return fetch('/api/authenticate')
-    .then(res => res.json())
-    .then(...)
-} else {
-  return Promise.reject(new Error('Invalid Authentication'))
-}
-```
-
----
-
-Podemos modelar esta variacão de comportamento em vários objetos de estrategia:
-
-```
-class LoginStrategy {
-  constructor (params) {
-    this.params
-  }
-
-  canAuthenticate() {
-    return this.params.login && this.params.password
-  }
-
-  execute(params) {
-    return fetch('/api/sessions')
-      .then(res => res.json())
-  }
-}
-```
-
----
-
-```
-class ApiStrategy {
-  constructor (params) {
-    this.params
-  }
-
-  canAuthenticate() {
-    return this.params.api_key && true
-  }
-
-  execute(params) {
-    return fetch('/api/sessions')
-      .then(res => res.json())
-  }
-}
-```
-
----
-
-```
-function selectStrategy(params) {
-  const strategies = [LoginStrategy, ApiStrategy, ...]
-
-  for (StrategyClass in strategies)
-    const strategy = new StrategyClass(params)
-
-    if (strategy.canAuthenticate()) {
-      return strategy.execute()
-    }
-  }
-}
-```
 
 # Adapter
 
 Eventualmente temos objetos de negócios com interfaces incompatíveis, porém
 percebemos que conseguimos adaptá-lo para a interface desejada. Nessas
 situacões o padrão de Adapter é muito útil.
+
+---
 
 ```javascript
 class ArrayListAdapter {
@@ -568,6 +567,8 @@ class MapListAdapter {
   }
 }
 ```
+
+---
 
 # Conclusão
 
