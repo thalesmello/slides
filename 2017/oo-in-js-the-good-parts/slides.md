@@ -1,30 +1,164 @@
-# OO in JavaScript: The Good Parts
+title: My Presentation
+class: animation-fade no-counter
+layout: true
+
+---
+
+class: impact
+
+# OO in JavaScript
+# The Good Parts
+
+Thales Mello https://github.com/thalesmello
+
+Derek Stavis https://github.com/derekstavis
+
 TDC São Paulo
 
-- Thales Mello http://github.com/thalesmello
-- Derek Stavis http://github.com/derekstavis
+---
+
+# Por que você programa JavaScript?
+
+--
+
+Pode que seja pra criar aplicações web
+
+--
+
+Pode ser que seja pra criar servidores super performáticos
+
+--
+
+Pode ser que seja para reaproveitar o mesmo código no browser e no servidor 😉
+
+--
+
+Mas ainda assim, JavaScript é uma linguagem com um histórico bastante confuso.
+
+--
+
+É uma linguagem funcional? É uma linguagem imperativa?
+
 
 ---
 
-Por que você programa JavaScript?
+# É uma mistura dos dois
+
+Predominantemente, é uma linguagem .alt[imperativa] mas com características .alt[funcionais] e de .alt[orientação a objetos]
+
+--
+
+A comunidade tem seguido muito por uma linha funcional nos últimos anos, deixando a capacidade de trabalhar com objetos um pouco de lado
+
+--
+
+## O ponto é que
+frequentemente, lidamos com problemas de arquitetura que são muito elegantemente resolvidos utilizando .alt[padrões de design OO]
 
 ---
 
-## Por que Orientação a Objetos é Relevante?
+class: impact
 
-- Juntar Objetos e Dados pode deixar seu sistema mais coeso
-
----
-
-## Imutabilidade
-
-O primeiro passo para evitar os problemas mais comuns da OO à la Java é evitar mutabilidade, simplesmente
-simplesmente evite mudar estado. Basta tr'abalhar com o conceito de que o seu objeto recebe o seu estado
-na criação e que qualquer um de seus métodos só retorna um novo objeto.
+# É sobre isso que vamos falar hoje
 
 ---
 
-## Null Object Pattern
+# Por que diabos Orientação a Objetos é Relevante?
+
+Afinal, programação funcional não é uma maneira muito melhor de se escrever código?
+
+--
+
+Isso não é *sempre* verdade
+
+--
+
+Por exemplo, é muito comum precisar trabalhar sempre com os mesmos conjunto de dados e funções
+
+--
+
+Numa situação dessas, faria muito sentido atrelar aquele conjunto de dados àquelas funções num único objeto
+
+--
+
+É disso que se trata orientação a objetos
+
+---
+
+Antes de a gente continuar, o primeiro passo para manter a sanidade mental ao se trabalhar com orientação a objetos é adotar
+
+--
+
+# Imutabilidade
+
+--
+
+Afinal, não é nenhum conceito exclusivo de linguagens funcionais.
+
+--
+
+Para trabalhar adotar imutabilidade, basta trabalhar com o conceito de que os métodos (ou funções) de um objeto sempre vão retornar .alt[novos objetos, sem budar o estado]
+
+--
+
+---
+
+
+```javascript
+function main () {
+  const user = {
+    name: 'Filipe',
+    surname: 'Devlin'
+  }
+
+  const getUserFullName = user => `${user.name} ${user.surname}`
+  const modifyUser = (user, newProps) => Object.assign({}, user, newProps)
+
+  console.log(getUserFullName(modifyUser(user, { name: 'Mestre' })))
+}
+```
+
+---
+
+
+```javascript
+function main () {
+  const user = new User({
+    name: 'Filipe',
+    surname: 'Devlin'
+  })
+
+  console.log(user.modify({ name: 'Mestre' }).fullName())
+}
+
+class User {
+  constructor ({ name, surname }) {
+    this.name = name
+    this.surname = surname
+  }
+
+  fullName () {
+    return `${this.name} ${this.surname}`
+  }
+
+  modify (newProps) {
+    return new User(Object.assign({}, this, newProps))
+  }
+}
+```
+
+---
+
+Sabe quando você tem um monte de `if (obj == null)` em várias partes do código?
+
+--
+
+# Null Object Pattern
+
+Em vez de fazer isso, utilize um Null Object, que obedece à mesma interface
+
+---
+
 
 ```javascript
 document.onload = onPageLoad
@@ -41,7 +175,11 @@ function onPageLoad () {
       initializeHelpIcon(user)
     })
 }
+```
 
+---
+
+```javascript
 function populatePageWithUser (user) {
   if (user == null) {
     document.getElementById('user-name').innerHTML = 'Visitante'
@@ -69,6 +207,35 @@ function initializeHelpIcon (user) {
 ---
 
 ```javascript
+function populatePageWithUser (user) {
+*  if (user == null) {
+*    document.getElementById('user-name').innerHTML = 'Visitante'
+*    document.getElementById('status-message').innerHTML = 'Cadastre-se aqui!'
+*  }
+  else {
+    document.getElementById('user-name').innerHTML = user.name
+    document.getElementById('status-message').innerHTML = user.statusMessage
+  }
+}
+
+function initializeHelpIcon (user) {
+  let helpText
+*  if (user == null) {
+*    helpText = `Olá Visitante! Como posso te ajudar?`
+*  }
+  else {
+    helpText = `Olá ${user.name}! Como posso te ajudar?`
+  }
+
+  document.getElementById('help-message-text').innerHTML = helpText
+}
+```
+
+---
+
+# Alternativa
+
+```javascript
 document.onload = onPageLoad
 
 function onPageLoad () {
@@ -93,7 +260,11 @@ function makeNullUser () {
     statusMessage: 'Cadastre-se aqui!'
   }
 }
+```
 
+---
+
+```javascript
 function populatePageWithUser (user) {
   document.getElementById('user-name').innerHTML = user.name
   document.getElementById('status-message').innerHTML = user.statusMessage
@@ -107,7 +278,17 @@ function initializeHelpIcon (user) {
 
 ---
 
+Puxa... orientação a objetos faz os objetos ficarem muito acoplados
+e difíceis de testar!
+
+--
+
 # Dependency Injection and Factories
+
+Quando isso acontecer, por que não passar as dependências do seu projeto
+durante a construção do seu objeto?
+
+---
 
 ```javascript
 class DownloadManager {
@@ -126,7 +307,32 @@ class DownloadManager {
     return fs.readdirAsync(this.folder)
   }
 }
+```
 
+---
+
+```javascript
+class DownloadManager {
+  constructor (folder) {
+    this.folder = folder
+  }
+
+  downloadFile (url, filename) {
+*    const filePath = path.join(this.folder, filename)
+*    return fetch(url)
+      .then(data => data.json())
+*      .then(contents => fs.writeFileAsync(filePath, contents))
+  }
+
+  listDownloadedFiles () {
+*    return fs.readdirAsync(this.folder)
+  }
+}
+```
+
+---
+
+```
 class DownloadManager {
   constructor (fetch, readdir, pathJoin, writeFile, folder) {
     this.fetch = fetch
@@ -149,6 +355,30 @@ class DownloadManager {
 }
 
 ```
+
+---
+
+Puxa, mas são muitas dependências para se passar durante a criação de um
+objeto. Isso é bastante trabalhoso.
+
+--
+
+# Repository Pattern
+
+Não necessariamente. Com o repository pattern, você pode manter isntâncias de todas
+as dependências do seu projeto em um objeto, o qual você pode passar como referência para a sua função ou na construção do seu objeto.
+
+---
+
+```javascript
+const repo = initializeRepository()
+...
+const { db, config } = repo
+```
+
+---
+
+Também, de vez em quando, 
 
 # Decorator
 
@@ -176,4 +406,45 @@ function makeSafeLog (log) {
   }
 }
 
+```
+
+---
+
+# Strategy
+
+* Objects that implements a specific strategy for solving a problem
+* Depending on the inputs, select at runtime the strategy to be used
+
+---
+
+```javascript
+const strategyBuilder = cond([
+ [both(has('email'), has('password')), login.build],
+ [has('api_key'), api.build],
+ [has('encryption_key'), encryption.build],
+ [T, rejectInvalidAuthObject],
+])
+```
+
+---
+
+# Adapter
+
+* Adapta a interface de um objeto para outra
+* Muito usado com inversão de dependencia
+
+---
+ 
+```javascript
+class ArrayListAdapter {
+  constructor(array) { this.array = array }
+  length() { return 10 }
+  getItem(index) { ... }
+}
+
+class MapListAdapter {
+ constructor(object) { this.obj = obj }
+  length() { return Object.keys(this.obj).length }
+  getItem(index) { return Object.values(this.obj)[index] }
+}
 ```
