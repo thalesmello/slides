@@ -21,7 +21,7 @@ TDC São Paulo
 
 --
 
-Pode que seja pra criar aplicações web
+Pode ser que seja pra criar aplicações web
 
 --
 
@@ -33,7 +33,7 @@ Pode ser que seja para reaproveitar o mesmo código no browser e no servidor �
 
 --
 
-Mas ainda assim, JavaScript é uma linguagem com um histórico bastante confuso.
+Mas ainda assim, JavaScript é uma linguagem com um histórico bastante confuso
 
 --
 
@@ -52,8 +52,9 @@ A comunidade tem seguido muito por uma linha funcional nos últimos anos, deixan
 
 --
 
-## O ponto é que
-frequentemente, lidamos com problemas de arquitetura que são muito elegantemente resolvidos utilizando .alt[padrões de design OO]
+## O ponto é
+
+Frequentemente lidamos com problemas de arquitetura que são muito elegantemente resolvidos utilizando .alt[padrões de design OO]
 
 ---
 
@@ -97,7 +98,7 @@ Afinal, não é nenhum conceito exclusivo de linguagens funcionais.
 
 --
 
-Para trabalhar adotar imutabilidade, basta trabalhar com o conceito de que os métodos (ou funções) de um objeto sempre vão retornar .alt[novos objetos, sem budar o estado]
+Para trabalhar adotar imutabilidade, basta trabalhar com o conceito de que os métodos (ou funções) de um objeto sempre vão retornar .alt[novos objetos, sem mudar o estado]
 
 --
 
@@ -278,7 +279,7 @@ function initializeHelpIcon (user) {
 
 ---
 
-Puxa... orientação a objetos faz os objetos ficarem muito acoplados
+Mas poxa... Orientação a objetos faz os objetos ficarem muito acoplados
 e difíceis de testar!
 
 --
@@ -358,22 +359,36 @@ class DownloadManager {
 
 ---
 
-Puxa, mas são muitas dependências para se passar durante a criação de um
+Poxa, mas são muitas dependências para se passar durante a criação de um
 objeto. Isso é bastante trabalhoso.
 
 --
 
 # Repository Pattern
 
-Não necessariamente. Com o repository pattern, você pode manter isntâncias de todas
-as dependências do seu projeto em um objeto, o qual você pode passar como referência para a sua função ou na construção do seu objeto.
+Sim porque estamos usando argumentos, mas não necessariamente. Com o repository
+pattern, você pode manter instâncias de todas as dependências do seu projeto em
+um objeto, o qual você pode passar como referência para a sua função ou na
+construção do seu objeto.
 
 ---
 
 ```javascript
-const repo = initializeRepository()
-...
-const { db, config } = repo
+const repository = initializeServices()
+const downloader = new DownloadManager(repository)
+
+class DownloadManager {
+  constructor ({ fetch, readdir, pathJoin, writeFile, folder }) {
+    this.fetch = fetch
+    this.readdir = readdir
+    this.pathJoin = pathJoin
+    this.writeFile = writeFile
+    this.folder = folder
+  }
+
+  ...
+}
+
 ```
 
 ---
@@ -412,39 +427,116 @@ function makeSafeLog (log) {
 
 # Strategy
 
-* Objects that implements a specific strategy for solving a problem
-* Depending on the inputs, select at runtime the strategy to be used
-
----
+Eventualmente nossa aplicacão terá comportamentos variaveis de acordo com o contexto de execucão.
+Nossa solucão acaba sempre sendo usar um `switch/case` ou um conjunto de `if/else if`:
 
 ```javascript
-const strategyBuilder = cond([
- [both(has('email'), has('password')), login.build],
- [has('api_key'), api.build],
- [has('encryption_key'), encryption.build],
- [T, rejectInvalidAuthObject],
-])
+if (auth.email && auth.password) {
+  return fetch('/api/sessions')
+    .then(res => res.json())
+    .then(...)
+} else if (auth.api_key) {
+  return fetch('/api/authenticate')
+    .then(res => res.json())
+    .then(...)
+} else if has('public_key') {
+  return fetch('/api/authenticate')
+    .then(res => res.json())
+    .then(...)
+} else {
+  return Promise.reject(new Error('Invalid Authentication'))
+}
 ```
 
 ---
+
+Podemos modelar esta variacão de comportamento em vários objetos de estrategia:
+
+```
+class LoginStrategy {
+  constructor (params) {
+    this.params
+  }
+
+  canAuthenticate() {
+    return this.params.login && this.params.password
+  }
+
+  execute(params) {
+    return fetch('/api/sessions')
+      .then(res => res.json())
+  }
+}
+```
+
+---
+
+```
+class ApiStrategy {
+  constructor (params) {
+    this.params
+  }
+
+  canAuthenticate() {
+    return this.params.api_key && true
+  }
+
+  execute(params) {
+    return fetch('/api/sessions')
+      .then(res => res.json())
+  }
+}
+```
+
+---
+
+```
+function selectStrategy(params) {
+  const strategies = [LoginStrategy, ApiStrategy, ...]
+
+  for (StrategyClass in strategies)
+    const strategy = new StrategyClass(params)
+
+    if (strategy.canAuthenticate()) {
+      return strategy.execute()
+    }
+  }
+}
+```
 
 # Adapter
 
-* Adapta a interface de um objeto para outra
-* Muito usado com inversão de dependencia
+Eventualmente temos objetos de negócios com interfaces incompatíveis, porém
+percebemos que conseguimos adaptá-lo para a interface desejada. Nessas
+situacões o padrão de Adapter é muito útil.
 
----
- 
 ```javascript
 class ArrayListAdapter {
-  constructor(array) { this.array = array }
-  length() { return 10 }
-  getItem(index) { ... }
+  constructor(array) {
+    this.array = array
+  }
+
+  length() {
+    return this.array.length
+  }
+
+  getItem(index) {
+    return this.array[index]
+  }
 }
 
 class MapListAdapter {
- constructor(object) { this.obj = obj }
-  length() { return Object.keys(this.obj).length }
-  getItem(index) { return Object.values(this.obj)[index] }
+  constructor(map) {
+    this.map = map
+  }
+
+  length() {
+    return this.map.size()
+  }
+
+  getItem(index) {
+    return this.map.values()[index]
+  }
 }
 ```
+
