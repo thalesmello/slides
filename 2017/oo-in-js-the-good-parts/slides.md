@@ -291,7 +291,7 @@ if (auth.email && auth.password) {
   return fetch('/api/authenticate')
     .then(res => res.json())
     .then(...)
-} else if has('public_key') {
+} else if (auth.public_key) {
   return fetch('/api/authenticate')
     .then(res => res.json())
     .then(...)
