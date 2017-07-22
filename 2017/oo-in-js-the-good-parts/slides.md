@@ -578,8 +578,6 @@ Orientação a objetos se trata de uma maneira conveniente de utilizar polimorfi
 
 Ou seja, em vez de você ficar construindo o seu código com `if (...) {} else {}`, você consegue construir toda a lógica utilizando apenas objetos e chamadas de métodos.
 
---
-
 ---
 
 # Já ouviu falar de Smalltalk?
