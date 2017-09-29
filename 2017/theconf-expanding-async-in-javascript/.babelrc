@@ -1,0 +1,8 @@
+{
+  "env": {},
+  "ignore": [],
+  "plugins": ["transform-async-generator-functions"],
+  "presets": [
+    "stage-3"
+  ]
+}

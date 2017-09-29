@@ -1,0 +1,23 @@
+{
+  "name": "theconf-expanding-async-in-javascript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "bluebird": "^3.5.0",
+    "comedy": "^1.2.0",
+    "js-csp": "^1.0.1",
+    "rxjs": "^5.4.3",
+    "top-level-await": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-plugin-syntax-async-generators": "^6.13.0",
+    "babel-preset-stage-3": "^6.24.1"
+  }
+}
