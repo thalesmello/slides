@@ -58,7 +58,7 @@ Roteiro
 - Navegação de arquivos "fuzzy" estilo "Sublime Ctrl-P" com "fzf-vim"
 - Auto completar código com o "nvim-completion-manager"
 - Linting da sua linguagem favorita com o "ale"
-- Auto completar pares "()", "{} e "[]" com o "lexima"
+- Auto completar pares "()", "{} e "[]" com o "auto-pairs"
 - Expansão de snippets com o "UltiSnips"
 - Como usar comandos "bash" para manipular seu código
 
