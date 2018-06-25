@@ -113,8 +113,8 @@ https://github.com/w0rp/ale
 
 ---
 
-`lexima-vim`
-https://github.com/cohama/lexima.vim
+`auto-pairs`
+https://github.com/jiangmiao/auto-pairs
 
 ---
 
